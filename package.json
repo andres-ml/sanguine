@@ -1,0 +1,17 @@
+{
+  "name": "sanguine",
+  "version": "1.0.0",
+  "description": "Sanguine Guard bot",
+  "main": "main.js",
+  "dependencies": {
+    "discord.js": "^11.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+  ],
+  "author": "andres-ml",
+  "license": "MIT"
+}
