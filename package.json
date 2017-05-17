@@ -4,14 +4,15 @@
   "description": "Sanguine Guard bot",
   "main": "main.js",
   "dependencies": {
-    "discord.js": "^11.1.0"
+    "dedent-js": "^1.0.1",
+    "discord.js": "^11.1.0",
+    "node-fetch": "^1.6.3"
   },
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-  ],
+  "keywords": [],
   "author": "andres-ml",
   "license": "MIT"
 }
