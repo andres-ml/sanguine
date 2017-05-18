@@ -2,3 +2,4 @@ config.json
 node_modules
 pieces/test.js
 pieces/test/*
+.idea/*
