@@ -48,7 +48,7 @@ class Bot {
         try {
             parts = this.loadDirectory(directory)
         } catch (error) {
-            // console.log(directory, error)
+            console.log(directory, error)
         }
         return parts
     }
