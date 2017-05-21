@@ -6,7 +6,8 @@
   "dependencies": {
     "dedent-js": "^1.0.1",
     "discord.js": "^11.1.0",
-    "node-fetch": "^1.6.3"
+    "node-fetch": "^1.6.3",
+    "pg": "^6.2.2"
   },
   "devDependencies": {},
   "scripts": {

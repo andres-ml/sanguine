@@ -1,4 +1,5 @@
 config.json
+config.real.json
 node_modules
 pieces/test.js
 pieces/test/*

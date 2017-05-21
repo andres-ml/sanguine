@@ -1,5 +1,6 @@
-var Piece   = require.main.require('./piece.js')
-var Discord = require('discord.js')
+var Discord     = require('discord.js')
+var Persistency = require.main.require('./persistency/members_persistency.js')
+var Piece       = require.main.require('./piece.js')
 
 class Members extends Piece {
 
@@ -16,18 +17,49 @@ class Members extends Piece {
         /**
          * Add member
          */
-        this.addCommand('+ [name]*', (data, context) => {
+        this.addCommand('+|add [name]*', (data, context) => {
             let name = data.name
 
-            // TODO: Call up Repo, or make Persistency layer to pass db related items to Repo
-
-            // context.message.channel.send('')
+            if (Members.validateName(name, context)) {
+                Persistency.addMember(name, context)
+            }
         }, {
-            description: 'Adds a member with name `name`.'
+            description: 'Adds a member to the clan list.'
         })
 
+        /**
+         * Remove member
+         */
+        this.addCommand('-|remove [name]*', (data, context) => {
+            let name = data.name
+
+            if (Members.validateName(name, context)) {
+                Persistency.removeMember(name, context)
+            }
+        }, {
+            description: 'Removes a member from the clan list.'
+        })
+
+        /**
+         * List member
+         */
+        this.addCommand('ls|list [delim]', (data, context) => {
+            let delim = data.delim
+
+            Persistency.listMember(context, delim)
+        }, {
+            description: 'Displays all members of the clan.'
+        })
     }
 
+    static validateName(name, context) {
+        if (name !== null && name.length > 0) {
+            return true
+        } else {
+            context.message.channel.send('Invalid name.')
+            return false
+        }
+    }
 }
 
 module.exports = Members
