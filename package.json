@@ -6,11 +6,12 @@
   "dependencies": {
     "dedent-js": "^1.0.1",
     "discord.js": "^11.1.0",
-    "node-fetch": "^1.6.3"
+    "node-fetch": "^1.6.3",
+    "pg": "^6.2.2"
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node main.js"
   },
   "keywords": [],
   "author": "andres-ml",

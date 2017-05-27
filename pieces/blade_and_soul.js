@@ -11,7 +11,7 @@ class BladeAndSoul extends Piece {
         return 'Blade and Soul utilities'
     }
 
-    hmcToGold(hmc, rate) {
+    static hmcToGold(hmc, rate) {
         return Math.ceil( Math.ceil(hmc / 0.9) / rate)
     }
 
