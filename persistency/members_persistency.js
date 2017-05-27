@@ -3,13 +3,8 @@ var Repo = require.main.require('./lib/repo.js')
 class MembersPersistency {
 
     static addMember(name, context) {
-        Repo.Select(['name'], 'members', ['name'], [name], (error, result) => {
-            if (error) {
-                console.log(error)
-                return context.message.channel.send(error)
-            }
-
-            if (result.length > 0) {
+        this.findMember(name, context, (members) => {
+            if (members.length > 0) {
                 return context.message.channel.send('Member already exist.')
             } else {
                 Repo.Insert([name], ['name'], 'members', (error, success) => {
@@ -45,11 +40,28 @@ class MembersPersistency {
     }
 
     static removeMember(name, context) {
-
+        this.findMember(name, context, (members) => {
+            if (members.length <= 0) {
+                return context.message.channel.send('Member does not exist.')
+            } else {
+                Repo.Delete([name], ['name'], 'members', (error, success) => {
+                    if (error) {
+                        return context.message.channel.send(error)
+                    }
+                    context.message.channel.send(`${name} has been removed from clan.`)
+                })
+            }
+        })
     }
 
-    static findMember(name, callback) {
-
+    static findMember(name, context, callback) {
+        Repo.Select(['name'], 'members', ['name'], [name], (error, result) => {
+            if (error) {
+                console.log(error)
+                return context.message.channel.send(error)
+            }
+            callback(result)
+        })
     }
 }
 

@@ -18,7 +18,7 @@ class Members extends Piece {
          * Add member
          */
         this.addCommand('+|add [name]*', (data, context) => {
-            let name = data.name
+            let name = data.name.join(' ')
 
             if (Members.validateName(name, context)) {
                 Persistency.addMember(name, context)
@@ -31,7 +31,7 @@ class Members extends Piece {
          * Remove member
          */
         this.addCommand('-|remove [name]*', (data, context) => {
-            let name = data.name
+            let name = data.name.join(' ')
 
             if (Members.validateName(name, context)) {
                 Persistency.removeMember(name, context)
