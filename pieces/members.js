@@ -1,5 +1,5 @@
 var Discord     = require('discord.js')
-var Persistency = require.main.require('./persistency/members_persistency.js')
+var Persistency = require('./persistency/members_persistency.js')
 var Piece       = require.main.require('./piece.js')
 
 class Members extends Piece {
@@ -21,7 +21,9 @@ class Members extends Piece {
             let name = data.name.join(' ')
 
             if (Members.validateName(name, context)) {
-                Persistency.addMember(name, context)
+                Persistency.addMember(name)
+                    .then((result) => context.message.channel.send(result))
+                    .catch((error) => context.message.channel.send(error))
             }
         }, {
             description: 'Adds a member to the clan list.'
@@ -34,19 +36,23 @@ class Members extends Piece {
             let name = data.name.join(' ')
 
             if (Members.validateName(name, context)) {
-                Persistency.removeMember(name, context)
+                Persistency.removeMember(name)
+                    .then((result) => context.message.channel.send(result))
+                    .catch((error) => context.message.channel.send(error))
             }
         }, {
             description: 'Removes a member from the clan list.'
         })
 
         /**
-         * List member
+         * List members
          */
         this.addCommand('ls|list [delim]', (data, context) => {
             let delim = data.delim
 
-            Persistency.listMember(context, delim)
+            Persistency.listMembers(delim)
+                .then((result) => context.message.channel.send(result))
+                .catch((error) => context.message.channel.send(error))
         }, {
             description: 'Displays all members of the clan.'
         })
