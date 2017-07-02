@@ -1,5 +1,5 @@
 var Discord     = require('discord.js')
-var Persistency = require('./persistency/members_persistency.js')
+var Guild       = require.main.require('./lib/guild.js')
 var Piece       = require.main.require('./piece.js')
 
 class Members extends Piece {
@@ -21,7 +21,7 @@ class Members extends Piece {
             let name = data.name.join(' ')
 
             if (Members.validateName(name, context)) {
-                Persistency.addMember(name)
+                Guild.addMember(name)
                     .then((result) => context.message.channel.send(result))
                     .catch((error) => context.message.channel.send(error))
             }
@@ -36,7 +36,7 @@ class Members extends Piece {
             let name = data.name.join(' ')
 
             if (Members.validateName(name, context)) {
-                Persistency.removeMember(name)
+                Guild.removeMember(name)
                     .then((result) => context.message.channel.send(result))
                     .catch((error) => context.message.channel.send(error))
             }
@@ -47,11 +47,14 @@ class Members extends Piece {
         /**
          * List members
          */
-        this.addCommand('ls|list [delim]', (data, context) => {
-            let delim = data.delim
+        this.addCommand('ls|list [glue]', (data, context) => {
+            let glue = data.glue ? data.glue : '\n'
 
-            Persistency.listMembers(delim)
-                .then((result) => context.message.channel.send(result))
+            Guild.getMembers()
+                .then((members) => {
+                    let message = `There are ${members.length} members:\n${members.join(glue)}`
+                    context.message.channel.send(message)
+                })
                 .catch((error) => context.message.channel.send(error))
         }, {
             description: 'Displays all members of the clan.'
