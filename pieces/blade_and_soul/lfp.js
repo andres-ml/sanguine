@@ -30,8 +30,8 @@ class LFP extends Piece {
                 size: 6
             },
             {
-                names: ['test'],
-                size: 2
+                names: ['irontech forge', 'if', 'itf', 'lab'],
+                size: 6
             },
         ]
         dungeons.forEach(dungeon => dungeon.queue = [])
