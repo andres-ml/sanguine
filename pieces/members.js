@@ -5,7 +5,7 @@ var Piece       = require.main.require('./piece.js')
 class Members extends Piece {
 
     key() {
-        return 'members'
+        return 'member'
     }
 
     description() {
