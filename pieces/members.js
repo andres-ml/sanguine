@@ -52,7 +52,7 @@ class Members extends Piece {
 
             Guild.getMembers()
                 .then((members) => {
-                    let message = `There are ${members.length} members:\n${members.join(glue)}`
+                    let message = `There are ${members.length} members:\n${members.sort().join(glue)}`
                     context.message.channel.send(message)
                 })
                 .catch((error) => context.message.channel.send(error))
