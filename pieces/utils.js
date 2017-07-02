@@ -66,7 +66,14 @@ class Utils extends Piece {
          */
         this.addCommand('help', (data, context) => {
             let help = this.buildHelp()
-            context.message.channel.send('```' + help + '```')
+            let helpLines = help.split('\n')
+            let chunk = 0
+            let chunkSize = 20
+            while (chunk < helpLines.length) {
+                context.message.author.send('```' + helpLines.slice(chunk, chunk + chunkSize).join('\n') + '```')
+                chunk += chunkSize
+            }
+
         }, {
             description: 'print this help'
         })
