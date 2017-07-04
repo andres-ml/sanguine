@@ -11,6 +11,14 @@ class Members extends Piece {
     description() {
         return 'Blade and Soul external Clan Member handling'
     }
+    
+    options() {
+        return {
+            auth: {
+                roles: ['Mod']
+            }
+        }
+    }
 
     initialize() {
 

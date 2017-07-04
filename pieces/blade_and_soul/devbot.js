@@ -6,6 +6,14 @@ class DevBot extends Piece {
         return 'Utilities for Bot development.'
     }
 
+    options() {
+        return {
+            auth: {
+                roles: ['Mod']
+            }
+        }
+    }
+
     initialize() {
         this.addCommand('dev|maint|maintenance [mode]', (data, context) => {
             let message = data.mode === '+' ?
