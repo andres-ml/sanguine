@@ -10,6 +10,14 @@ class Time extends Piece {
         return 'Delay and schedule messages'
     }
 
+    options() {
+        return {
+            auth: {
+                roles: ['Mod']
+            }
+        }
+    }
+
     schedule(channel, message, secondsFromNow) {
         if (secondsFromNow > 0) {
             channel.send(`Sending message ${message} in ${secondsFromNow} seconds`)

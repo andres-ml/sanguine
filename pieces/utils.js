@@ -19,6 +19,10 @@ class Utils extends Piece {
         this.addCommand('reload', (data, context) => {
             this.dispatcher.build()
             context.message.channel.send('Reloaded bot pieces')
+        }, {
+            auth: {
+                roles: ['Mod']
+            }
         })
 
 
@@ -57,7 +61,10 @@ class Utils extends Piece {
 
             context.message.channel.send(`Aliased ${command} to '${data.alias}'`)
         }, {
-            description: 'Aliases a command. E.g: alias sendIn1h "time in 3600"'
+            description: 'Aliases a command. E.g: alias sendIn1h "time in 3600"',
+            auth: {
+                roles: ['Mod']
+            }
         })
 
 
