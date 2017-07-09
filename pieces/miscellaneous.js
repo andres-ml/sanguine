@@ -14,6 +14,18 @@ class Miscellaneous extends Piece {
     initialize() {
 
         /**
+         * Server greeting
+         */
+        this.addListener('guildMemberAdd', (member) => {
+            let guild = member.guild
+            let channel = guild.channels.find('name', 'welcome')
+            if (channel === null) {
+                channel = guild.defaultChannel
+            }
+            channel.send(`Welcome ${member.user} to ${guild.name}!`);
+        })
+
+        /**
          * Sends a random xkcd comic (http://xkcd.com)
          */
         this.addCommand('xkcd', (data, context) => {
