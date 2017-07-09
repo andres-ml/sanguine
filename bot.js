@@ -10,19 +10,18 @@ class Bot {
 
     initialize() {
         this.bot = new Discord.Client()
-
-        this.build()
-
-        this.bot.on('message', message => {
-            if (message.content.indexOf(this.config.prefix) === 0) {
-                let command = message.content.substring(this.config.prefix.length)
-                this.run(command, message)
-            }
-        })
-
         this.bot.login(this.config.auth)
 
-        // this.bot.on('ready', () => this.bot.user.setGame('hi'))
+        this.bot.on('ready', () => {
+            this.build()
+            this.bot.on('message', message => {
+                if (message.content.indexOf(this.config.prefix) === 0) {
+                    let command = message.content.substring(this.config.prefix.length)
+                    this.run(command, message)
+                }
+            })
+        })
+
     }
 
     run(command, message) {
