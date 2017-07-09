@@ -27,6 +27,13 @@ class Miscellaneous extends Piece {
             channel.send(`Welcome ${member.user} to ${guild.name}!`);
         })
 
+
+        this.addListener('message', (message) => {
+            if (Math.random() < 1/1000) {
+                message.channel.send( this.getFunnyReply(message.author) )
+            }
+        })
+
         /**
          * Sends a random xkcd comic (http://xkcd.com)
          */
@@ -81,6 +88,18 @@ class Miscellaneous extends Piece {
 
     setStatus(status) {
         this.dispatcher.bot.user.setGame(status)
+    }
+
+    getFunnyReply(author) {
+        const replies = [
+            'Are you sure about that?',
+            'Hah, as I expected!',
+            'I knew you would say that!',
+            '*stares in disbelief*',
+            `Is ${author} a man, or a woman?`
+        ]
+
+        return replies[Math.floor(Math.random() * replies.length)]
     }
 
 }
