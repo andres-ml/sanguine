@@ -21,7 +21,6 @@ class Bot {
                 }
             })
         })
-
     }
 
     run(command, message) {
@@ -38,8 +37,8 @@ class Bot {
     build() {
         this.clearEvents()
         this.commander = new Commander()
-        this.pieces = this.loadPieces('./pieces')
-        this.pieces.forEach(piece => this.loadCommands(piece))
+        this.parts = this.loadPieces('./pieces')
+        this.parts.forEach(piece => this.loadCommands(piece))
     }
 
     loadPieces(directory) {
@@ -111,12 +110,20 @@ class Bot {
     }
 
     addListener(eventName, callback) {
+        let eventCallback = function() {
+            try {
+                callback.apply(this, arguments)
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
         if (!(eventName in this.events)) {
             this.events[eventName] = []
         }
 
-        this.events[eventName].push(callback)
-        this.bot.on(eventName, callback)
+        this.events[eventName].push(eventCallback)
+        this.bot.on(eventName, eventCallback)
     }
 
 }

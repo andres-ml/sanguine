@@ -71,63 +71,82 @@ class Utils extends Piece {
         /**
          * Sends help to user that requests
          */
-        this.addCommand('help', (data, context) => {
-            let help = this.buildHelp()
-            let helpLines = help.split('\n')
-            let chunk = 0
-            let chunkSize = 20
-            while (chunk < helpLines.length) {
-                context.message.author.send('```' + helpLines.slice(chunk, chunk + chunkSize).join('\n') + '```')
-                chunk += chunkSize
-            }
-
+        this.addCommand('help [pieces]*', (data, context) => {
+            let help = this.buildHelp(data.pieces)
+            context.message.author.send(help)
         }, {
             description: 'print this help'
         })
 
     }
 
-    buildHelp(piece = null) {
+    buildHelp(pieces) {
         let prefix = this.dispatcher.config.prefix
-        if (piece !== null) prefix = piece.piece.key()
 
-        let description = this.dispatcher.config.description
-        if (piece !== null) description = piece.piece.description()
+        let pieceKeys = []
+        let piece = this.dispatcher
 
-        let commands = []
-        if (piece !== null) commands = piece.piece.getCommands()
-
-        let parts = this.dispatcher.pieces
-        if (piece !== null) parts = piece.parts
-
-
-        let pad = string => {
-            const padLength = 4;
-            let times = Math.max(1, 5 - Math.floor(string.length / 25))
-            return padLength * times + string.length % 4
-
+        if (pieces.length > 0) {
+            let children = this.flatten(piece).piecesWithKey
+            let child = children.find(piece => piece.piece.key() === pieces[0])
+            while (child) {
+                pieceKeys.push(pieces.shift())
+                piece = child
+                children = this.flatten(piece).piecesWithKey
+                child = children.find(piece => piece.piece.key() === pieces[0])
+            }
         }
 
-        let header = [prefix, description].filter(n => n).join(' - ')
-        let getCommandHelp = command => {
+        return this.buildPieceHelp(prefix, pieceKeys, piece)
+    }
+
+    buildPieceHelp(prefix, keys, piece) {
+        let data = this.flatten(piece)
+
+        let commands = data.commands
+        let piecesWithKey = data.piecesWithKey
+
+        let keysPrefix = keys.map(key => key + ' ').join('')
+
+        let help = []
+
+        help.push.apply(help, commands.map(command => {
             let description = 'description' in command.options ? command.options.description : null
-            return `~ ${command.command}${description ? '\n    ' + description : ''}`
+            return `* ${prefix}${keysPrefix}${command.command}${description ? '\n> ' + description : ''}`
+        }))
+
+        if (piecesWithKey.length > 0) {
+            help.push('')
+            help.push(`To find out more about other commands, type:`)
+            help.push.apply(help, piecesWithKey.map(piece => {
+                let description = piece.piece.description()
+                return `${prefix}help ${keysPrefix}${piece.piece.key()}${description ? `\n> ${description}` : ''}`
+            }))
         }
 
-        let getPartHelp = part => {
-            return this.buildHelp(part).split('\n').join('\n  ')
-        }
-
-        let escape = '```'
-        let help = dedent`
-            ${'-'.repeat(header.length)}
-            ${header}
-            ${'-'.repeat(header.length)}
-            ${commands.map(getCommandHelp).join('\n')}
-            ${parts.map(getPartHelp).map(help => '  ' + help).join('\n')}
+        return dedent`
+            \`\`\`Markdown
+            ${help.join('\n')}
+            \`\`\`
         `
+    }
 
-        return help
+    flatten(piece) {
+        let commands = 'piece' in piece ? piece.piece.getCommands() : []
+        let piecesWithKey = piece.parts.filter(piece => piece.piece.key())
+
+        piece.parts
+            .filter(piece => !piece.piece.key())
+            .forEach(piece => {
+                let data = this.flatten(piece)
+                commands.push.apply(commands, data.commands)
+                commands.push.apply(piecesWithKey, data.piecesWithKey)
+            })
+
+        return {
+            commands: commands,
+            piecesWithKey: piecesWithKey
+        }
     }
 
 }
