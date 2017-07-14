@@ -139,8 +139,8 @@ class Utils extends Piece {
             .filter(piece => !piece.piece.key())
             .forEach(piece => {
                 let data = this.flatten(piece)
-                commands.push.apply(commands, data.commands)
-                commands.push.apply(piecesWithKey, data.piecesWithKey)
+                commands = commands.concat(data.commands)
+                piecesWithKey = piecesWithKey.concat(data.piecesWithKey)
             })
 
         return {
