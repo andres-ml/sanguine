@@ -99,6 +99,25 @@ class LFP extends Piece {
         return `Successfully queued you for ${dungeonName}`
     }
 
+    dequeue(dungeonName, user) {
+        let name    = dungeonName.trim().toLowerCase()
+        let dungeon = this.dungeons.find(dungeon => dungeon.names.indexOf(name) !== -1)
+
+        dungeonName = `\`${dungeonName}\``
+
+        if (!dungeon) {
+            return `Could not find dungeon ${dungeonName}`
+        }
+
+        if (dungeon.queue.indexOf(user) === -1) {
+            return `You are not queued for ${dungeonName}`
+        }
+
+        dungeon.queue.splice(dungeon.queue.indexOf(user), 1)
+
+        return `Successfully dequeued you from ${dungeonName}`
+    }
+
 }
 
 module.exports = LFP
