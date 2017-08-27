@@ -13,8 +13,6 @@ class Miscellaneous extends Piece {
 
     initialize() {
 
-        this.setStatus('the floor is lava')
-
         /**
          * Server greeting
          */
@@ -29,7 +27,7 @@ class Miscellaneous extends Piece {
 
 
         this.addListener('message', (message) => {
-            if (Math.random() < 1/1000) {
+            if (Math.random() < 1/5000) {
                 message.channel.send( this.getFunnyReply(message.author) )
             }
         })
@@ -84,10 +82,6 @@ class Miscellaneous extends Piece {
             description: 'Rolls a dice from 1 to X (dice X) or from X to Y (dice X Y)'
         })
 
-    }
-
-    setStatus(status) {
-        this.dispatcher.bot.user.setGame(status)
     }
 
     getFunnyReply(author) {
