@@ -96,7 +96,7 @@ class Bot {
         })
 
         piece.parts.forEach(part => {
-            this.loadCommands(part, prefix)
+            this.loadCommands(part, prefix.slice())
         })
     }
 
