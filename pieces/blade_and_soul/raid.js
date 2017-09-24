@@ -26,8 +26,7 @@ class Raid extends Interactive {
             {
                 emoji: '🚀',
                 callback: (message, user) => {
-                    const solution = this.buildRaids(message, data)
-                    console.log(solution)
+                    this.buildRaids(message, data).then(solution => message.channel.send(solution))
                     // user.send(solution)
                 }
             }
@@ -50,7 +49,7 @@ class Raid extends Interactive {
         this.addCommand('check <size> <amount> [options]*', (data, context) => {
             const content = this.content(data)
             const actions = this.actions(data)
-            this.create(context.message.channel, content, actions, {delay: actions.length * 2000}).then(message => this.addNumericReactions(message, data.options))
+            this.create(context.message.channel, content, actions, {delay: actions.length * 3000}).then(message => this.addNumericReactions(message, data.options))
         }, {
             description: 'Raid ready check'
         })
@@ -69,12 +68,27 @@ class Raid extends Interactive {
     }
 
     buildRaids(message, data) {
-        const users = this.getVotes(message, data)
-        const parties = this.buildParties(users, data)
-        console.log(parties)
-        return parties.map(party => {
-            return `${data.options[party.index]}: ${party.members.map(user => user.name).join(', ')}`
-        }).join('\n')
+        const votes = this.getVotes(message, data)
+        return new Promise((resolve, reject) => {
+            votes.then(users => {
+                const result = this.buildParties(users, data)
+                const lines = []
+
+                if (result.parties.length === 0) {
+                    return resolve('No solutions found')
+                }
+
+                const getName = user => user.member.nickname ? user.member.nickname : user.member.user.username
+
+                result.parties.forEach(party => {
+                    lines.push(`${data.options[party.index]}${party.members.length == data.size ? '' : ' (incomplete)'}: ${party.members.map(getName).join(', ')}`)
+                })
+                if (result.partyless.length > 0) {
+                    lines.push(`Partyless: ${result.partyless.map(getName).join(', ')}`)
+                }
+                return resolve(lines.join('\n'))
+            })
+        })
     }
 
     getVotes(message, data) {
@@ -91,11 +105,12 @@ class Raid extends Interactive {
         const isNotSelf = user => user !== this.dispatcher.bot.user
 
         const users = {}
+        const promises = []
         message.reactions.filter(isOptionReaction).forEach(messageReaction => {
             messageReaction.users.filter(isNotSelf).forEach((user, snowflake) => {
                 if (!(snowflake in users)) {
+                    promises.push(message.guild.fetchMember(user))
                     users[snowflake] = {
-                        user: user,
                         options: []
                     }
                 }
@@ -103,7 +118,12 @@ class Raid extends Interactive {
             })
         })
 
-        return users
+        return new Promise((resolve, reject) => {
+            Promise.all(promises).then(members => {
+                members.forEach(member => users[member.user.id].member = member)
+                resolve(users)
+            })
+        })
     }
 
     buildParties(users, data) {
@@ -111,14 +131,72 @@ class Raid extends Interactive {
         if (indices.length > data.amount) {
             indices = this.pickBest(users, indices, data.amount, data.size)
         }
-        return this.splitPeople(users, indices)
+        return this.splitPeople(users, indices, data)
     }
 
-    splitPeople(users, indices) {
-        return indices.map(index => new Object({
+    splitPeople(users, indices, data) {
+        const list = this.prioritySort(users, indices)
+        const parties = indices.map(index => new Object({
             index: index,
-            members: ['a', 'b']
+            members: []
         }))
+
+        const partyless = []
+
+        list.forEach(user => {
+            const party = this.assignParty(user, parties, data)
+            if (party !== null) {
+                parties[party].members.push(user)
+            }
+            else {
+                partyless.push(user)
+            }
+        })
+
+        return {
+            parties: parties,
+            partyless: partyless
+        }
+    }
+
+    prioritySort(users, indices) {
+        this.scoreCache = {}
+        return Object.values(users).sort(this.userCompare.bind(this, indices))
+    }
+
+    userCompare(indices, user1, user2) {
+        return this.score(user2, indices) - this.score(user1, indices)
+    }
+
+    score(user, indices) {
+        if (!(user.id in this.scoreCache)) {
+            const isWarlock = user.member.roles.find('name', 'Warlock')    !== null ? 1 : 0
+            const isTank    = user.member.roles.find('name', 'Tank')       !== null ? 1 : 0
+
+            const availability = user.options.filter(option => indices.indexOf(option) !== -1).length
+            const randomFactor = Math.floor(Math.random() * 10)
+
+            const score = isTank * 1000   // tanks have max priority
+                + isWarlock * 200   // warlocks have high priority
+                 // 0 availability means 0 priority (not picked) -- high availability means lower priority
+                + (availability === 0 ? -10000 : (availability * -50))
+                + randomFactor
+
+            this.scoreCache[user.id] = score
+        }
+
+        return this.scoreCache[user.id]
+    }
+
+    assignParty(user, parties, data) {
+        const available = parties.filter(party => party.members.length < parseInt(data.size))
+        available.sort((p1, p2) => p1.members.length - p2.members.length)
+        for (let i = 0; i < available.length; ++i) {
+            if (user.options.indexOf(parties[i].index) !== -1) {
+                return i
+            }
+        }
+        return null
     }
 
     pickBest(users, indices, amount, minPickSize) {
