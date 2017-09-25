@@ -5,7 +5,7 @@
   "main": "main.js",
   "dependencies": {
     "dedent-js": "^1.0.1",
-    "discord.js": "^11.1.0",
+    "discord.js": "^11.2.0",
     "node-fetch": "^1.6.3",
     "pg": "^6.2.2"
   },

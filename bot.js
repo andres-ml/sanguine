@@ -21,6 +21,8 @@ class Bot {
                 }
             })
         })
+
+        this.patchReactionAdd()
     }
 
     run(command, message) {
@@ -124,6 +126,34 @@ class Bot {
 
         this.events[eventName].push(eventCallback)
         this.bot.on(eventName, eventCallback)
+    }
+
+
+
+    /**
+     * messageReactionAdd only works for cached messages
+     * we manually listen for all reactions and emit a manual event
+     *
+     * @return {[type]} [description]
+     */
+    patchReactionAdd() {
+        const client = this.bot
+        client.on('raw', packet => {
+            if (packet.t === 'MESSAGE_REACTION_ADD' || packet.t === 'MESSAGE_REACTION_REMOVE') {
+                const data = packet.d
+                const eventName = packet.t === 'MESSAGE_REACTION_ADD' ? 'messageReactionAdd' : 'messageReactionRemove'
+
+                const channel = client.channels.get(data.channel_id)
+                if (!channel.messages.has(data.message_id)) {
+                    channel.fetchMessage(data.message_id).then(message => {
+                        Promise.all(message.reactions.map(reaction => reaction.fetchUsers())).then(_ => {
+                            const messageReaction = message.reactions.find(reaction => reaction.emoji.name === data.emoji.name)
+                            client.emit(eventName, messageReaction, messageReaction.users.get(data.user_id))
+                        })
+                    })
+                }
+            }
+        })
     }
 
 }
