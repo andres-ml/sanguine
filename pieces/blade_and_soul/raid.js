@@ -41,7 +41,7 @@ class Raid extends Interactive {
         this.addCommand('check <size> <amount> [options]*', (data, context) => {
             const content = this.content(data)
             const actions = this.actions(data)
-            this.create(context.message.channel, content, actions, {delay: actions.length * 3000}).then(message => ReactionHelper.addNumericReactions(message, data.options.length))
+            this.create(context.message.channel, content, actions, {delay: data.options.length * 3000}).then(message => ReactionHelper.addNumericReactions(message, data.options.length))
         }, {
             description: 'Raid ready check'
         })
