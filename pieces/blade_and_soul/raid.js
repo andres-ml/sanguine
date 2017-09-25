@@ -41,7 +41,7 @@ class Raid extends Interactive {
         this.addCommand('check <size> <amount> [options]*', (data, context) => {
             const content = this.content(data)
             const actions = this.actions(data)
-            this.create(context.message.channel, content, actions, {delay: data.options.length * 3000}).then(message => ReactionHelper.addNumericReactions(message, data.options.length))
+            this.create(context.message.channel, content, actions, {delay: data.options.length * 2000}).then(message => ReactionHelper.addNumericReactions(message, data.options.length))
         }, {
             description: 'Raid ready check'
         })
@@ -254,7 +254,6 @@ class Raid extends Interactive {
     splitPeople(users, indices, data) {
         // sort users by their score
         const list = this.prioritySort(users, indices)
-        console.log(this.scoreCache)
         // initialize parties
         const parties = indices.map(index => new Object({
             index: index,
@@ -289,7 +288,7 @@ class Raid extends Interactive {
      */
     prioritySort(users, indices) {
         this.scoreCache = {}
-        return Object.values(users).sort((user1, user2) => this.score(user2, indices) - this.score(user1, indices))
+        return Object.keys(users).map(key => users[key]).sort((user1, user2) => this.score(user2, indices) - this.score(user1, indices))
     }
 
     /**
