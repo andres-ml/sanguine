@@ -82,7 +82,7 @@ class Polls extends Piece {
             let index = Object.keys(emojiMap).find(key => emojiMap[key] === messageReaction.emoji.name)
             // if it does, update the vote count for its corresponding answer
             if (typeof index !== 'undefined') {
-                results[index] = messageReaction.users.array().length - 1    // remove bot's vote-- DO NOT USE messageReaction.count, it appears to be bugged
+                results[index] = messageReaction.users.size - 1    // remove bot's vote-- DO NOT USE messageReaction.count, it appears to be bugged
             }
         })
 
