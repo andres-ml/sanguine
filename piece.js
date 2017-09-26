@@ -1,3 +1,5 @@
+const AuthHelper = require.main.require('./lib/auth_helper.js')
+
 class Piece {
 
     key() {
@@ -101,24 +103,7 @@ class Piece {
     }
 
     isAuthorized(context, authOptions) {
-        if ('roles' in authOptions) {
-            // no server -- no roles
-            if (context.message.guild === null) {
-                return false
-            }
-            // get user with roles
-            let author = context.message.guild.members.find('id', context.message.author.id)
-            // filter command roles that the user has
-            let rolesInUser = authOptions.roles.filter(roleName => {
-                return author.roles.find('name', roleName) !== null
-            })
-            // reject if there are none
-            if (rolesInUser.length === 0) {
-                return false
-            }
-        }
-
-        return true
+        return AuthHelper.isAuthorized(context.message.author, context.message.guild, authOptions)
     }
 
 }

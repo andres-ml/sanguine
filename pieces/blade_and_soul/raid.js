@@ -26,6 +26,9 @@ class Raid extends Interactive {
                 emoji: '🚀',
                 callback: (message, user) => {
                     this.buildRaids(message, data).then(solution => user.send(solution))
+                },
+                auth: {
+                    roles: ['Mod']
                 }
             }
         ]
@@ -43,7 +46,10 @@ class Raid extends Interactive {
             const actions = this.actions(data)
             this.create(context.message.channel, content, actions, {delay: data.options.length * 2000}).then(message => ReactionHelper.addNumericReactions(message, data.options.length))
         }, {
-            description: 'Raid ready check'
+            description: 'Raid ready check',
+            auth: {
+                roles: ['Mod']
+            }
         })
 
         /**
