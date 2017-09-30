@@ -20,11 +20,12 @@ class Raid extends Interactive {
      * @param  {object} data
      * @return {array} array of interactions
      */
-    actions(data) {
+    actions() {
         return [
             {
                 emoji: '🚀',
                 callback: (message, user) => {
+                    const data = this.parseMessageRaidData(message.content)
                     this.buildRaids(message, data).then(solution => user.send(solution))
                 },
                 auth: {
@@ -38,13 +39,14 @@ class Raid extends Interactive {
 
         super.initialize()
 
+        this.register('raid-check', this.actions())
+
         /**
          * Raid ready check
          */
-        this.addCommand('check <size> <amount> [options]*', (data, context) => {
+        this.addCommand('check <amount> <size> [options]*', (data, context) => {
             const content = this.content(data)
-            const actions = this.actions(data)
-            this.create(context.message.channel, content, actions, {delay: data.options.length * 2000}).then(message => ReactionHelper.addNumericReactions(message, data.options.length))
+            this.create('raid-check', context.message.channel, content, {delay: data.options.length * 2000}).then(message => ReactionHelper.addNumericReactions(message, data.options.length))
         }, {
             description: 'Raid ready check',
             auth: {
@@ -71,10 +73,26 @@ class Raid extends Interactive {
      */
     content(data) {
         return [
-            `# Raid ready check`,
-            `${data.amount} x ${data.size}man raids ready check. Please vote in ALL your available slots.`,
-            `${data.options.map((option, index) => `${index + 1}. ${option}`).join('\n')}`
+            `# ${data.amount} x ${data.size}man raids ready check. Please vote in ALL your available slots.`,
+            `${data.options.map((option, index) => `${index + 1}. ${option}`).join('\n')}`,
         ].join('\n')
+    }
+
+    parseMessageRaidData(content) {
+        const match1 = content.match(/(\d+) x (\d+)man/)
+        const options = []
+        content.split('\n').forEach(line => {
+            const match = line.match(/^\d+\. (.+)$/)
+            if (match) {
+                options.push(match[1])
+            }
+        })
+
+        return {
+            size:  match1[2],
+            amount: match1[1],
+            options: options
+        }
     }
 
     /**
@@ -222,10 +240,11 @@ class Raid extends Interactive {
             	let picks = pick(index)
                 if (picks.length < minPickSize) return
 
+                // add people from this option to the total of picked
             	let iSet = combine(set, picks)
                 let iPicked = picked.slice().concat([index])
                 let iIndices = indices.slice()
-                iIndices.splice(i, 1)
+                iIndices.splice(i, 1)   // remove this option from the available list
 
                 let iBest = find(iIndices, remaining - 1, iPicked, iSet)
                 if (iBest.set.size > best.set.size) {
