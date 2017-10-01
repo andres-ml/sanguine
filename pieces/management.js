@@ -13,20 +13,40 @@ class Management extends Piece {
 
     initialize() {
 
+        this.announcementHandlers = {}
+
         /**
          *
          */
-        this.addCommand('announce <channel> <minutes> [words]*', (data, context) => {
+        this.addCommand('announce <channel> <tag> <minutes> [words]*', (data, context) => {
             let minutes = parseInt(data.minutes)
             if (!minutes || minutes > 8*60) {
                 return context.message.channel.send("Available time frame must be within 1 minute and 8 hours")
             }
             let announcement = data.words.join(' ')
             let channel = context.message.guild.channels.find('name', data.channel)
-            channel.send(`@everyone ${announcement} in ${this.formatTime(minutes)}`)
-            this.countdown(announcement, minutes, channel)
+            channel.send(`${data.tag} ${announcement} in ${this.formatTime(minutes)}`)
+            this.countdown(data.tag, announcement, minutes, channel)
         }, {
             description: 'Schedules an announcement in a channel',
+            auth: {
+                roles: ['Mod']
+            },
+        })
+
+        /**
+         *
+         */
+        this.addCommand('announce clear', (data, context) => {
+            this.setStatus('')
+            for (let message_id in this.announcementHandlers) {
+                const handler = this.announcementHandlers[message_id]
+                clearTimeout(handler)
+            }
+            this.announcementHandlers = {}
+            return context.message.channel.send("All announcements cleared")
+        }, {
+            description: 'Clears all active announcements',
             auth: {
                 roles: ['Mod']
             },
@@ -41,24 +61,25 @@ class Management extends Piece {
         return time
     }
 
-    countdown(announcement, minutes, channel) {
+    countdown(tag, announcement, minutes, channel) {
         const escape = '```'
         let text = this.countdownMessage(announcement, minutes)
-        channel.send(text).then(message => this.update(message, announcement, minutes))
+        channel.send(text).then(message => this.update(tag, message, announcement, minutes))
     }
 
-    update(message, announcement, minutes, rate = 1) {
+    update(tag, message, announcement, minutes, rate = 1) {
         if (minutes <= 0) {
             this.setStatus()
             message.delete()
-            return message.channel.send(`@here Now: ${announcement}`)
+            delete this.announcementHandlers[message.id]
+            return message.channel.send(`${tag === '@everyone' ? '@here' : tag} Now: ${announcement}`)
         }
 
         if (minutes < rate) rate = minutes
 
         this.setStatus(`${this.formatTime(minutes)} until ${announcement}`)
         message.edit(this.countdownMessage(announcement, minutes))
-        setTimeout(() => this.update(message, announcement, minutes - rate, rate), rate * 60 * 1000)
+        this.announcementHandlers[message.id] = setTimeout(() => this.update(tag, message, announcement, minutes - rate, rate), rate * 60 * 1000)
     }
 
     countdownMessage(announcement, minutes) {
