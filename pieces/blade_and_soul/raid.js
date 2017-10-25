@@ -31,7 +31,17 @@ class Raid extends Interactive {
                 auth: {
                     roles: ['Mod']
                 }
-            }
+            },
+            {
+                emoji: '📤',
+                callback: (message, user) => {
+                    const data = this.parseMessageRaidData(message.content)
+                    this.exportData(message, data).then(table => user.send(table))
+                },
+                auth: {
+                    roles: ['Mod']
+                }
+            },
         ]
     }
 
@@ -108,6 +118,14 @@ class Raid extends Interactive {
             {
                 name: 'Warlock',
                 score: 7,
+            },
+            {
+                name: 'HigherPriority',
+                score: 3,
+            },
+            {
+                name: 'LowerPriority',
+                score: -3,
             },
         ]
     }
@@ -549,6 +567,40 @@ class Raid extends Interactive {
                 options: ['Saturday', 'Sunday']
             }
         }
+    }
+
+    /**
+     * Builds a CSV-like message with users and their votes
+     *
+     * @param  {Discord.Message} message [description]
+     * @param  {object} data    [description]
+     * @return {Promise} promise that resolves into a string containing party data
+     */
+    exportData(message, data) {
+        const votes = this.getVotes(message, data)
+        return new Promise((resolve, reject) => {
+            votes.then(users => {
+                const getName = user => user.member.nickname ? user.member.nickname : user.member.user.username
+                const sortedUsers = Object.keys(users).map(key => users[key]).sort((user1, user2) => {
+                    const name1 = getName(user1)
+                    const name2 = getName(user2)
+                    if (name1 < name2) return -1
+                    if (name1 > name2) return 1
+                    return 0
+                })
+
+                const lines = sortedUsers.map(user => {
+                    const values = [getName(user)]
+                    data.options.forEach((option, index) => {
+                        const value = user.options.indexOf(index) === -1 ? '' : 'x'
+                        values.push(value)
+                    })
+                    return values.join(',')
+                })
+
+                resolve(lines.length > 0 ? lines.join('\n') : 'No votes')
+            })
+        })
     }
 
 }
