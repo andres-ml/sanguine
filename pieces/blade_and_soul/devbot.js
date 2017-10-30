@@ -1,3 +1,4 @@
+var Discord = require('discord.js')
 var Piece   = require.main.require('./piece.js')
 
 class DevBot extends Piece {
